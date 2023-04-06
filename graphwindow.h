@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QVector>
+#include <QLineEdit>
 
 namespace Ui {
 class GraphWindow;
@@ -16,14 +17,16 @@ class GraphWindow : public QWidget
 public:
     explicit GraphWindow(QWidget *parent = nullptr);
     ~GraphWindow();
+    void plot(QString* values, int xCount, QString str);
 
 private:
     Ui::GraphWindow *ui;
     QVector <double> x;
     QVector <double> y;
-//    QPushButton* qpb;
-//    QCustomPlot* qcp;
-//    QWidget* wgt;
+    double xMax;
+    double yMax;
+    double yMin;
+    double xMin;
 };
 
 #endif // GRAPHWINDOW_H

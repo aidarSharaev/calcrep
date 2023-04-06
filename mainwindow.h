@@ -21,6 +21,7 @@ class MainWindow : public QMainWindow
 public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
+  void getDEValue(QVector<int>& arr);
 
 private:
   Ui::MainWindow *ui;
@@ -41,6 +42,7 @@ private:
   QFont* font2;
 
   QString mainStr;
+  QString* values;
 
   QDoubleValidator* v;
 
