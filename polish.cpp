@@ -86,7 +86,7 @@ void in_buffer(buffer_t** main_buffer, const elem_t elem) {
 }
 
 void delete_buff(buffer_t** main_buffer) {
-    while (*main_buffer) {
+    while ((*main_buffer)) {
         buffer_t* tmp = *main_buffer;
         *main_buffer =  (*main_buffer)->next;
         free(tmp);
@@ -94,7 +94,7 @@ void delete_buff(buffer_t** main_buffer) {
 }
 
 void delete_stack(stack_t** main_stack) {
-    while (*main_stack) {
+    while ((*main_stack)) {
         stack_t* tmp = *main_stack;
         *main_stack = (*main_stack)->next;
         free(tmp);
@@ -179,6 +179,7 @@ void polish(stack_t** main_stack, buffer_t** main_buffer, elem_t elem, int k) {
                 ++count_in_buffer;
             }
             delete_in_stack(main_stack);
+            flag= 0;
         } else {
             if (((*main_stack) == NULL) || (flag == 1)) {
                 flag = 0;
@@ -198,7 +199,6 @@ void polish(stack_t** main_stack, buffer_t** main_buffer, elem_t elem, int k) {
             }
         }
     }
-    //printf_st(*main_buffer);
 }
 
 void copy_in_parser(elem_t* elem, const char* str, const int param) {
@@ -269,10 +269,20 @@ int calculating(buffer_t** main_buffer, stack_t** main_stack) {
                 x = tan(x);
                 break;
             case 's': /*asin*/
-                x = asin(x);
+                if (fabs(x) > 1.000000) {
+                    invalid_value(main_stack, main_buffer);
+                    step = -1;
+                } else {
+                    x = asin(x);
+                }
                 break;
             case 'c': /*acos*/
-                x = acos(x);
+                if (fabs(x) > 1.000000) {
+                    invalid_value(main_stack, main_buffer);
+                    step = -1;
+                } else {
+                    x = acos(x);
+                }
                 break;
             case 't': /*atan*/
                 x = atan(x);

@@ -1,6 +1,6 @@
 #include "mainwindow.h"
-#include "polish.h"
 #include "ui_mainwindow.h"
+#include "polish.h"
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
@@ -185,7 +185,6 @@ void MainWindow::change()
 
 bool MainWindow::checkString(QPushButton* pbtn)
 {
-    qDebug() << "(" << text2[0]->text() << ")";
     if (argList.isEmpty())
         argList.push_back(-1);
 
@@ -284,18 +283,22 @@ void MainWindow::deleteSymbol()
     QPushButton* pbtn = dynamic_cast<QPushButton*>(QObject::sender());
     if (mainStr.isEmpty()) return;
     if (pbtn == btn2[8]) {
+        mainStr.chop(1);
         if (argList.back() == RtrnVal::ODZ) {
-            mainStr.chop(1);
             bracketDown();
             while (mainStr.back() >= 'a' && mainStr.back() <= 'z')
                 mainStr.chop(1);
+
         } else if (argList.back() == RtrnVal::IKS) {
-            --xCounter;
-            mainStr.chop(1);
+            --xCounter;    
         } else if (argList.back() == RtrnVal::DOT) {
             --flag;
-        argList.pop_back(); 
+        } else if (argList.back() == RtrnVal::CLOSE_BR) {
+            bracketUp();
+        } else if (argList.back() == RtrnVal::OPEN_BR) {
+            bracketDown();
         }
+        argList.pop_back();
     } else {
         bracketCounter = xCounter = 0;
         mainStr.clear();
@@ -307,17 +310,46 @@ void MainWindow::deleteSymbol()
 
 void MainWindow::goToCalc()
 {
-    if (bracketCounter) {;return;}
+    if (bracketCounter) {QMessageBox box; box.setText("the number of brackets is different"); box.exec();return;}
     if (xCounter > 0) {QMessageBox box; box.setText("enter the value x and press \'=x\'"); box.exec();return;}
+    stack_t* main_stack = NULL;
+    buffer_t* main_buffer = NULL;
+    buffer_t* sec_buffer = NULL;
+    const char* input_string = qPrintable(text->text());
+    int rslt = string_parser(input_string, &main_stack, &main_buffer, &sec_buffer);
+    if (rslt || main_buffer->next) {
+    } else {
+        QString string = static_cast<QString>(main_buffer->element.str);
+        argList.clear();
+        xCounter = 0;
+        bracketCounter = 0;
+        flag = 2;
+        emit calculator(string);
+        for(QChar &ch : string)
+        {
+            if (ch >= '0' && ch <= '9')
+                argList.push_back(RtrnVal::NUMBER);
+            else if (ch == '.')
+                argList.push_back(RtrnVal::DOT);
+            else
+                argList.push_back(RtrnVal::PM);
+        }
+    }
+    delete_buff(&main_buffer);
+    free(main_buffer);
+    delete_buff(&sec_buffer);
+    free(sec_buffer);
+    delete_stack(&main_stack);
+    free(main_stack);
 }
 
 void MainWindow::calcX()
 {
-    QString XString = "x";
-    QString replaseString = text2[4]->text();
-    qDebug() << text2[4]->text();
-    if (!xCounter) {return;}
+    if (!xCounter || text2[4]->text().isEmpty()) {return;}
     else {
+        xCounter = 0;
+        QString XString = "x";
+        QString replaseString = text2[4]->text();
         mainStr = text->text();
         mainStr.replace(XString, replaseString);
         mainStr.replace(QString(","), QString("."));
@@ -336,7 +368,7 @@ void MainWindow::operator<<(QVector<int> vec)
 
 void MainWindow::windowCreate()
 {
-   if (bracketCounter > 0)
+   if (bracketCounter > 0 || text->text().isEmpty())
        return;
    graphWindow = new GraphWindow();
    values = new QString[4];
