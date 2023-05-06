@@ -51,7 +51,7 @@ private:
   GraphWindow* graphWindow;
 
   bool checkString(QPushButton* pbtn);
-  int whatIsIt(QPushButton* pbtn);
+  int whatIsIt(QString arg);
 
   enum RtrnVal {NUMBER = 0, PM, OPER, DOT, ODZ, OPEN_BR, CLOSE_BR, TRIGO, IKS};
 

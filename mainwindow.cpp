@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     qbl2->setSpacing(0);
 
     font2 = new QFont("Comic Sans MS", 20, 200);
-{
+
     QString number;
     const QSize btnSize = QSize(56, 58);
     for (int i = 0; i < 23; i++) {
@@ -44,8 +44,6 @@ MainWindow::MainWindow(QWidget *parent)
         }
         btn[i]->setFixedSize(btnSize);
     }
-}
-    {
         v = new QDoubleValidator(this);
         v->setBottom(-1000000.0);
         v->setTop(1000000.0);
@@ -57,7 +55,6 @@ MainWindow::MainWindow(QWidget *parent)
             text2[i]->setFont(QFont("Comic Sans MS", 8, 200));
             text2[i]->setValidator(v);
         }
-    }
 
     btn[0]->setFixedSize(116,58);
     btn2[10]->setFixedSize(110,58);
@@ -150,7 +147,7 @@ MainWindow::MainWindow(QWidget *parent)
     text->setFont(*font);
     text->setGeometry(QRect(0, 0, 480, 60));
     text->setAlignment(Qt::AlignRight);
-    text->setReadOnly(true);
+    //text->setReadOnly(true);
     text->setPlaceholderText("i'm waiting..");
     text->setMaxLength(255);
 
@@ -170,7 +167,25 @@ short MainWindow::flag = 0;
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+  qDebug() << "!@#";
+  //delete graphWindow;
+  for (int i = 0; i < 23;i++)
+    delete[] btn[i];
+  for (int i = 0; i < 12;i++)
+    delete[] btn2[i];
+  delete qbl;
+  delete qbl2;
+  delete text;
+  for (int i = 0; i < 5;i++)
+    delete[] text2[i];
+  delete font;
+  delete font2;
+  //for (int i = 0; i <4;i++)
+   // delete values;
+  delete v;
+  delete wgt;
+  delete wgt2;
+  delete ui;
 }
 
 void MainWindow::change()
@@ -189,34 +204,42 @@ bool MainWindow::checkString(QPushButton* pbtn)
         argList.push_back(-1);
 
     int back = argList.back();
-    int parametr = whatIsIt(pbtn);
+    int parametr = whatIsIt(pbtn->text());
 
     if (mainStr.isEmpty() && (parametr == RtrnVal::OPER || parametr == RtrnVal::CLOSE_BR || parametr == RtrnVal::DOT)) {
+        qDebug() << "1";
         return false;
     }
     if ((back == RtrnVal::OPEN_BR || back == RtrnVal::ODZ) && (parametr == RtrnVal::OPER || parametr == RtrnVal::DOT || parametr == RtrnVal::CLOSE_BR)) {
+        qDebug() << "2";
         return false;
     }
     if (back == RtrnVal::CLOSE_BR) {
         if (parametr == RtrnVal::OPER || parametr == RtrnVal::PM) {
         } else if (bracketCounter > 0){
         } else {
+            qDebug() << "3";
             return false;
         }
     }
     if ((back == RtrnVal::PM && parametr == RtrnVal::OPER) || (back == RtrnVal::OPER && parametr == RtrnVal::PM)) {
+        qDebug() << "4";
         return false;
     }
     if ((back == RtrnVal::IKS && parametr == RtrnVal::NUMBER) || (back == RtrnVal::NUMBER && parametr == RtrnVal::IKS)) {
+        qDebug() << "5";
         return false;
     }
     if ((back == RtrnVal::NUMBER || back == RtrnVal::IKS) && (parametr == RtrnVal::ODZ || parametr == RtrnVal::OPEN_BR)) {
+        qDebug() << "6";
         return false;
     }
     if ((back == RtrnVal::OPER || back == RtrnVal::PM) && (parametr == CLOSE_BR || back == parametr)) {
+        qDebug() << "7";
         return false;
     }
     if ((back == RtrnVal::DOT && parametr != RtrnVal::NUMBER) || (back == RtrnVal::IKS && parametr == RtrnVal::IKS)) {
+        qDebug() << "8";
         return false;
     }
 
@@ -228,35 +251,52 @@ bool MainWindow::checkString(QPushButton* pbtn)
     }
 
     if (parametr == RtrnVal::DOT) {
-        if (!flag || flag >= 2)
+        if (!flag || flag >= 2) {
+            qDebug() << "9";
             return false;
+          }
         if (back == RtrnVal::DOT){
+            qDebug() << "10";
             return false;
         }
         if (back != RtrnVal::NUMBER) {
+            qDebug() << "11";
             return false;
         }
         ++flag;
     }
-    if (back == -1)
-        argList.pop_back();
-    argList.push_back(parametr);
+    if (back == -1) {
+      argList.pop_back();
+    }
+
+
 
     if (parametr == RtrnVal::OPEN_BR || parametr == RtrnVal::ODZ || pbtn->text() == "^(")
         bracketUp();
-    if (parametr == RtrnVal::CLOSE_BR)
+    if (bracketCounter > 0 && parametr == RtrnVal::CLOSE_BR)
         bracketDown();
+    else if (!bracketCounter && parametr == RtrnVal::CLOSE_BR){
+        qDebug() << "12";
+      return false;
+    }
 
-    if (bracketCounter < 0) return false;
+    argList.push_back(parametr);
+    if (parametr == RtrnVal::ODZ || pbtn->text() == "^(") {
+      argList.push_back(RtrnVal::OPEN_BR);
+      //bracketUp();
+      }
+
     if (parametr == RtrnVal::IKS)
         ++xCounter;
-
+    QDebug debug = qDebug();
+    for (int i = 0; i < argList.size(); i++) {
+                debug << argList[i] << " ";
+            }
     return true;
 }
 
-int MainWindow::whatIsIt(QPushButton* pbtn)
+int MainWindow::whatIsIt(QString arg)
 {
-    QString arg = pbtn->text();
     if (arg.back() >= '0' && arg.back() <= '9')
         return RtrnVal::NUMBER;
     if (arg == "+" || arg == "-")
@@ -283,28 +323,49 @@ void MainWindow::deleteSymbol()
     QPushButton* pbtn = dynamic_cast<QPushButton*>(QObject::sender());
     if (mainStr.isEmpty()) return;
     if (pbtn == btn2[8]) {
-        mainStr.chop(1);
-        if (argList.back() == RtrnVal::ODZ) {
-            bracketDown();
-            while (mainStr.back() >= 'a' && mainStr.back() <= 'z')
-                mainStr.chop(1);
-
-        } else if (argList.back() == RtrnVal::IKS) {
-            --xCounter;    
-        } else if (argList.back() == RtrnVal::DOT) {
-            --flag;
-        } else if (argList.back() == RtrnVal::CLOSE_BR) {
-            bracketUp();
-        } else if (argList.back() == RtrnVal::OPEN_BR) {
-            bracketDown();
-        }
-        argList.pop_back();
+        if (!mainStr.isEmpty()) {
+            QChar rt = mainStr.back();
+            mainStr.chop(1);
+            QDebug debug = qDebug();
+            qDebug() << "!!!!!";
+            debug << "###########################" << '\n';
+            for (int i = 0; i < argList.size(); i++) {
+                        debug << argList[i] << " ";
+                    }
+            debug << '\n' << mainStr << '\n';
+            debug << "###########################" << "\n\n";
+          if (!argList.isEmpty() && argList.back() == RtrnVal::ODZ) {
+              bracketDown();
+          while (!mainStr.isEmpty() && (rt != '(' || rt != ')') && mainStr.back() >= 'a' && mainStr.back() <= 'z')
+            mainStr.chop(1);
+          qDebug() << "*******";
+          } else if (!argList.isEmpty() && argList.back() == RtrnVal::IKS) {
+              --xCounter;
+          } else if (!argList.isEmpty() && argList.back() == RtrnVal::DOT) {
+              --flag;
+          } else if (!argList.isEmpty() && argList.back() == RtrnVal::CLOSE_BR) {
+              bracketUp();
+          } else if (!argList.isEmpty() && argList.back() == RtrnVal::OPEN_BR) {
+              bracketDown();
+          }
+          argList.pop_back();
+          qDebug() << "!!!!!";
+          debug << "$$$$$$$$$$$$$$$$$" << '\n';
+          for (int i = 0; i < argList.size(); i++) {
+                      debug << argList[i] << " ";
+                  }
+          debug << '\n' << mainStr << '\n';
+          debug << "$$$$$$$$$$$$$$$$$" << "\n\n";
+          } else {
+            return;
+          }
     } else {
         bracketCounter = xCounter = 0;
         mainStr.clear();
         argList.clear();
         flag = 0;
     }
+    //if (!mainStr.isEmpty())
     emit deleteText(mainStr);
 }
 
@@ -349,7 +410,7 @@ void MainWindow::calcX()
     else {
         xCounter = 0;
         QString XString = "x";
-        QString replaseString = text2[4]->text();
+        QString replaseString = "(" +text2[4]->text() + ")";
         mainStr = text->text();
         mainStr.replace(XString, replaseString);
         mainStr.replace(QString(","), QString("."));
@@ -368,14 +429,14 @@ void MainWindow::operator<<(QVector<int> vec)
 
 void MainWindow::windowCreate()
 {
-   if (bracketCounter > 0 || text->text().isEmpty())
-       return;
-   graphWindow = new GraphWindow();
-   values = new QString[4];
-   for (int i = 0; i < 4;i++) {
-       values[i] = text2[i]->text();
-   }
-   graphWindow->setWindowModality(Qt::ApplicationModal);
-   graphWindow->plot(values, xCounter, mainStr);
-   graphWindow->show();
+//   if (bracketCounter > 0 || text->text().isEmpty())
+//       return;
+//   graphWindow = new GraphWindow();
+//   values = new QString();
+//   for (int i = 0; i < 4;i++) {
+//       values[i] = text2[i]->text();
+//   }
+//   graphWindow->setWindowModality(Qt::ApplicationModal);
+//   graphWindow->plot(values, xCounter, mainStr);
+//   graphWindow->show();
 }

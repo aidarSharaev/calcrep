@@ -3,6 +3,7 @@
 #include <string.h>
 #include "polish.h"
 #include <math.h>
+#include <QDebug>
 
 static const char* list_of_oper[] = {
     "sin",/*0*/
@@ -60,13 +61,33 @@ void out_stack(stack_t** main_stack, buffer_t** main_buffer) {
     strcpy_s(element.str, (*main_stack)->element.str);
     size_t len = strlen((*main_stack)->element.str);
     element.str[len] = '\0';
-    in_buffer(main_buffer, element);
+    in_buffer(main_buffer, element, 1);
     stack_t* tmp = *main_stack;
     *main_stack = (*main_stack)->next;
     free(tmp);
 }
 
-void in_buffer(buffer_t** main_buffer, const elem_t elem) {
+int in_buffer(buffer_t** main_buffer, const elem_t elem, int k) {
+  if (k < 0) {
+      char buff[101];
+      strcpy(buff, elem.str);
+      size_t m_size = strlen(buff);
+      if (*buff == '-' || *buff == '+') {
+        for (size_t i = 0; i < (m_size - 1); i++)
+          buff[i] = buff[i + 1];
+        buff[m_size - 1] = '\0';
+        m_size = strlen(buff);
+      }
+      if (m_size > 19) {
+        return 1;
+      } else if (m_size < 19) {
+      } else if (m_size == 19) {
+        if (strcmp(buff, "9223372036854775807") > 0) {
+          return 1;
+        }
+        printf("tut\n");
+      }
+    }
     buffer_t* tmp = (buffer_t*)calloc(1, sizeof(buffer_t));
     strcpy_s(tmp->element.str, elem.str);
     tmp->element.priority = elem.priority;
@@ -83,6 +104,7 @@ void in_buffer(buffer_t** main_buffer, const elem_t elem) {
         crr->next = tmp;
         tmp->next = NULL;
     }
+    return 0;
 }
 
 void delete_buff(buffer_t** main_buffer) {
@@ -109,8 +131,10 @@ void printf_st(buffer_t* main_buffer) {
 }
 
 int string_parser(const char* string, stack_t** main_stack, buffer_t** main_buffer, buffer_t** sec_buffer) {
+  qDebug() << "123123";
     elem_t elem = { "\0", 0 };
     int C = 0, param = -1;
+    int rt = 0;
     char copy_string[256] = "\0";
     for (size_t i = 0; i < strlen(string); i++) {
         for (int k = 0; k < 29; k++) {
@@ -122,7 +146,7 @@ int string_parser(const char* string, stack_t** main_stack, buffer_t** main_buff
                     C++;
                     if (i == (strlen(string) - 1)) {
                         copy_in_parser(&elem, copy_string, -2);
-                        polish(main_stack, main_buffer, elem, k);
+                        rt = polish(main_stack, main_buffer, elem, k);
                     }
                 } else {
                     if (C == 0) {
@@ -143,19 +167,21 @@ int string_parser(const char* string, stack_t** main_stack, buffer_t** main_buff
                     copy_in_parser(&elem, copy_string, param);
                     param = 10;
                     copy_string[0] = '\0';
-                    polish(main_stack, main_buffer, elem, k);
+                    rt = polish(main_stack, main_buffer, elem, k);
                 }
+                if (rt) return 1;
                 break;
             }
         }
     }
+    qDebug() << "123123";
     while (*main_stack != NULL) {
         out_stack(main_stack, main_buffer);
         ++count_in_buffer;
     }
     buffer_t* pt = *main_buffer;
     for (int index = 0; index < count_in_buffer; index++) {
-        in_buffer(sec_buffer, pt->element);
+        in_buffer(sec_buffer, pt->element, 1);
         pt = pt->next;
     }
     int rtrn = 0;
@@ -165,9 +191,10 @@ int string_parser(const char* string, stack_t** main_stack, buffer_t** main_buff
     return rtrn;
 }
 
-void polish(stack_t** main_stack, buffer_t** main_buffer, elem_t elem, int k) {
+int polish(stack_t** main_stack, buffer_t** main_buffer, elem_t elem, int k) {
     if (elem.priority == 0) {
-        in_buffer(main_buffer, elem);
+        int x = in_buffer(main_buffer, elem, -1);
+        if (x) {return 1;}
         ++count_in_buffer;
     } else {
         if (k == 28) {
@@ -199,6 +226,7 @@ void polish(stack_t** main_stack, buffer_t** main_buffer, elem_t elem, int k) {
             }
         }
     }
+    return 0;
 }
 
 void copy_in_parser(elem_t* elem, const char* str, const int param) {

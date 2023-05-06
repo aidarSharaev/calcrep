@@ -26,7 +26,7 @@ void in_stack(stack_t** main_stack, const elem_t elem);
 
 void out_stack(stack_t** main_stack, buffer_t** main_buffer);
 
-void in_buffer(buffer_t** main_buffer, const elem_t elem);
+int in_buffer(buffer_t** main_buffer, const elem_t elem, int k);
 
 int string_parser(const char* string, stack_t** main_stack, buffer_t** main_buffer, buffer_t** sec_buffer);
 
@@ -34,7 +34,7 @@ void copy_in_parser(elem_t* elem, const char* str, const int param);
 
 void printf_st(buffer_t* main_buffer);
 
-void polish(stack_t** main_stack, buffer_t** main_buffer, elem_t elem, int k);
+int polish(stack_t** main_stack, buffer_t** main_buffer, elem_t elem, int k);
 
 void delete_in_stack(stack_t** main_stack);
 
