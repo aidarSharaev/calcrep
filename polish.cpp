@@ -131,7 +131,6 @@ void printf_st(buffer_t* main_buffer) {
 }
 
 int string_parser(const char* string, stack_t** main_stack, buffer_t** main_buffer, buffer_t** sec_buffer) {
-  qDebug() << "123123";
     elem_t elem = { "\0", 0 };
     int C = 0, param = -1;
     int rt = 0;
@@ -174,7 +173,6 @@ int string_parser(const char* string, stack_t** main_stack, buffer_t** main_buff
             }
         }
     }
-    qDebug() << "123123";
     while (*main_stack != NULL) {
         out_stack(main_stack, main_buffer);
         ++count_in_buffer;

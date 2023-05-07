@@ -6,13 +6,14 @@ MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
   , ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
-
+	ui->setupUi(this);
+	graphWindow = nullptr;
+	c_credit = nullptr;
     wgt = new QWidget(this);
     wgt->setGeometry(QRect(240, 60, 240, 360));
 
     wgt2 = new QWidget(this);
-    wgt2->setGeometry(QRect(0, 60, 240, 360));
+		wgt2->setGeometry(QRect(0, 60, 240, 360));
 
     qbl = new QGridLayout(wgt);
     qbl->setAlignment(Qt::AlignRight);
@@ -143,11 +144,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     font = new QFont("Monospace", 25, 200);
 
-    text = new QLineEdit(this);
+		wgt3 = new QWidget(this);
+		wgt3->setGeometry(QRect(0, 0, 480, 60));
+		text = new QLineEdit(wgt3);
     text->setFont(*font);
     text->setGeometry(QRect(0, 0, 480, 60));
     text->setAlignment(Qt::AlignRight);
-    //text->setReadOnly(true);
+		text->setReadOnly(true);
     text->setPlaceholderText("i'm waiting..");
     text->setMaxLength(255);
 
@@ -157,8 +160,13 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(this->btn2[11], SIGNAL(clicked()), this, SLOT(calcX()));
     QObject::connect(this->btn[22], SIGNAL(clicked()), this, SLOT(goToCalc()));
     QObject::connect(this->btn2[9], SIGNAL(clicked()), this, SLOT(windowCreate()));
+		QObject::connect(this->btn2[10], SIGNAL(clicked()), this, SLOT(creditCreate()));
 
-    wgt->show();
+	 //wgt->show();
+		//wgt3->show();
+		//graphWindow->hide();
+
+
 }
 
 int MainWindow::bracketCounter = 0;
@@ -167,8 +175,9 @@ short MainWindow::flag = 0;
 
 MainWindow::~MainWindow()
 {
-  qDebug() << "!@#";
-  //delete graphWindow;
+	qDebug() << "!@#";
+	if (graphWindow)
+		delete graphWindow;
   for (int i = 0; i < 23;i++)
     delete[] btn[i];
   for (int i = 0; i < 12;i++)
@@ -180,11 +189,10 @@ MainWindow::~MainWindow()
     delete[] text2[i];
   delete font;
   delete font2;
-  //for (int i = 0; i <4;i++)
-   // delete values;
   delete v;
   delete wgt;
   delete wgt2;
+	delete wgt3;
   delete ui;
 }
 
@@ -269,8 +277,6 @@ bool MainWindow::checkString(QPushButton* pbtn)
       argList.pop_back();
     }
 
-
-
     if (parametr == RtrnVal::OPEN_BR || parametr == RtrnVal::ODZ || pbtn->text() == "^(")
         bracketUp();
     if (bracketCounter > 0 && parametr == RtrnVal::CLOSE_BR)
@@ -326,19 +332,11 @@ void MainWindow::deleteSymbol()
         if (!mainStr.isEmpty()) {
             QChar rt = mainStr.back();
             mainStr.chop(1);
-            QDebug debug = qDebug();
-            qDebug() << "!!!!!";
-            debug << "###########################" << '\n';
-            for (int i = 0; i < argList.size(); i++) {
-                        debug << argList[i] << " ";
-                    }
-            debug << '\n' << mainStr << '\n';
-            debug << "###########################" << "\n\n";
-          if (!argList.isEmpty() && argList.back() == RtrnVal::ODZ) {
-              bracketDown();
-          while (!mainStr.isEmpty() && (rt != '(' || rt != ')') && mainStr.back() >= 'a' && mainStr.back() <= 'z')
-            mainStr.chop(1);
-          qDebug() << "*******";
+						if (!argList.isEmpty() && !mainStr.isEmpty() && mainStr.back() >= 'a' && mainStr.back() <= 'z') {
+							bracketDown();
+							argList.pop_back();
+					while (!mainStr.isEmpty() && (rt == '(') && mainStr.back() >= 'a' && mainStr.back() <= 'z')
+						mainStr.chop(1);
           } else if (!argList.isEmpty() && argList.back() == RtrnVal::IKS) {
               --xCounter;
           } else if (!argList.isEmpty() && argList.back() == RtrnVal::DOT) {
@@ -348,14 +346,8 @@ void MainWindow::deleteSymbol()
           } else if (!argList.isEmpty() && argList.back() == RtrnVal::OPEN_BR) {
               bracketDown();
           }
-          argList.pop_back();
-          qDebug() << "!!!!!";
-          debug << "$$$$$$$$$$$$$$$$$" << '\n';
-          for (int i = 0; i < argList.size(); i++) {
-                      debug << argList[i] << " ";
-                  }
-          debug << '\n' << mainStr << '\n';
-          debug << "$$$$$$$$$$$$$$$$$" << "\n\n";
+					if (!argList.isEmpty())
+						argList.pop_back();
           } else {
             return;
           }
@@ -397,11 +389,11 @@ void MainWindow::goToCalc()
         }
     }
     delete_buff(&main_buffer);
-    free(main_buffer);
+		//free(main_buffer);
     delete_buff(&sec_buffer);
-    free(sec_buffer);
+		//free(sec_buffer);
     delete_stack(&main_stack);
-    free(main_stack);
+		//free(main_stack);
 }
 
 void MainWindow::calcX()
@@ -429,14 +421,51 @@ void MainWindow::operator<<(QVector<int> vec)
 
 void MainWindow::windowCreate()
 {
-//   if (bracketCounter > 0 || text->text().isEmpty())
-//       return;
-//   graphWindow = new GraphWindow();
-//   values = new QString();
-//   for (int i = 0; i < 4;i++) {
-//       values[i] = text2[i]->text();
-//   }
-//   graphWindow->setWindowModality(Qt::ApplicationModal);
-//   graphWindow->plot(values, xCounter, mainStr);
-//   graphWindow->show();
+if (bracketCounter > 0 || text->text().isEmpty())
+		return;
+for (int i = 0; i < 4; i++)
+		{
+		values.append(text2[i]->text());
+		}
+graphWindow = new GraphWindow(this);
+graphWindow->setGeometry(QRect(0, 0, 480, 420));
+qDebug() << values[0] << values[1] << values[2] << values[3];
+graphWindow->plot(values, xCounter, mainStr);
+graphWindow->show();
+h_hide();
 }
+
+void MainWindow::openCalcl()
+{
+if (graphWindow)
+		{
+		graphWindow->hide();
+		delete graphWindow;
+		}
+if (c_credit)
+		{
+		c_credit->hide();
+		delete c_credit;
+}
+wgt3->show();
+wgt->show();
+wgt2->show();
+values.clear();
+}
+
+void MainWindow::creditCreate()
+{
+c_credit = new credit(this);
+c_credit->setGeometry(QRect(0, 0, 480, 420));
+h_hide();
+c_credit->show();
+}
+
+void MainWindow::h_hide()
+{
+	wgt3->hide();
+	wgt->hide();
+	wgt2->hide();
+}
+
+

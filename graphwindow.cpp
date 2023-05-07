@@ -3,16 +3,19 @@
 #include "polish.h"
 #include <cmath>
 
+
 GraphWindow::GraphWindow(QWidget *parent):
     QWidget(parent),
     ui(new Ui::GraphWindow)
 {
-    ui->setupUi(this);
+ ui->setupUi(this);
+ backk = new QPushButton(this);
+ QObject::connect(this->backk, SIGNAL(clicked()), parent, SLOT(openCalcl()));
 }
 
-void GraphWindow::plot(QString* values, int xCount, QString str)
+void GraphWindow::plot(QStringList values, int xCount, QString str)
 {
-    for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++) {
         if (values[i].isEmpty() && !(i % 2)) values[i] = "-1000000.00";
         else if (values[i].isEmpty()) values[i] = "1000000.00";
     }
@@ -78,10 +81,11 @@ void GraphWindow::plot(QString* values, int xCount, QString str)
     ui->widget->addGraph();
     ui->widget->graph()->addData(x, y);
     ui->widget->replot();
+		backk->setGeometry(QRect(440,400,40,20));
 }
 
 GraphWindow::~GraphWindow()
 {
-    delete ui;
+		delete backk;
+		delete ui;
 }
-

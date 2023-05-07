@@ -12,29 +12,25 @@ CONFIG += c++11
 DEFINES += QCUSTOMPLOT_USE_LIBRARY
 
 SOURCES += \
-    graphwindow.cpp \
-    main.cpp \
-    mainwindow.cpp \
+				credit.cpp \
+				graphwindow.cpp \
+				main.cpp \
+				mainwindow.cpp \
 				polish.cpp
 
 HEADERS += \
-    graphwindow.h \
-    mainwindow.h \
+				credit.h \
+				graphwindow.h \
+				mainwindow.h \
 				polish.h
 
 
 FORMS += \
-    graphwindow.ui \
-    mainwindow.ui
-
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+				graphwindow.ui \
+				mainwindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../sharedlib-compilation/release/ -lqcustomplotd2
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../sharedlib-compilation/debug/ -lqcustomplotd2
-else:unix: LIBS += -L$$PWD/../sharedlib-compilation/ -lqcustomplotd2
 
 INCLUDEPATH += $$PWD/../sharedlib-compilation/debug
 DEPENDPATH += $$PWD/../sharedlib-compilation/debug

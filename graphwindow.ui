@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>GraphWindow</class>
  <widget class="QWidget" name="GraphWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>480</width>
+    <height>420</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -10,8 +18,8 @@
     <rect>
      <x>-1</x>
      <y>-1</y>
-     <width>721</width>
-     <height>601</height>
+     <width>481</width>
+     <height>400</height>
     </rect>
    </property>
   </widget>

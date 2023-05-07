@@ -8,6 +8,7 @@
 #include <QDoubleValidator>
 #include <QMessageBox>
 #include "graphwindow.h"
+#include "credit.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -31,6 +32,7 @@ private:
 
   QWidget* wgt;
   QWidget* wgt2;
+	QWidget* wgt3;
 
   QGridLayout* qbl;
   QGridLayout* qbl2;
@@ -42,13 +44,14 @@ private:
   QFont* font2;
 
   QString mainStr;
-  QString* values;
+	QStringList values;
 
   QDoubleValidator* v;
 
   QVector<int> argList;
 
-  GraphWindow* graphWindow;
+	GraphWindow* graphWindow;
+	credit* c_credit;
 
   bool checkString(QPushButton* pbtn);
   int whatIsIt(QString arg);
@@ -60,6 +63,7 @@ private:
   static short flag;
   static void bracketUp() {++bracketCounter;};
   static void bracketDown() {--bracketCounter;};
+	void h_hide();
 
   void operator<<(QVector<int> vec);
 
@@ -74,6 +78,10 @@ private slots:
   void goToCalc();
   void calcX();
   void windowCreate();
+	void creditCreate();
+
+public slots:
+	void openCalcl();
 
 };
 
